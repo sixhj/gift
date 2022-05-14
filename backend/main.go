@@ -1,12 +1,14 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"gift/boot"
+)
 
 func main() {
-	engine := gin.Default()
-	engine.POST("/hello", func(context *gin.Context) {
-		context.JSON(200, "hello")
-		return
-	})
-	engine.Run()
+
+	err := boot.Run()
+	if err != nil {
+		panic(err)
+	}
+
 }
