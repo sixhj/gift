@@ -1,9 +1,11 @@
-package config
+package boot
 
-type Config struct {
-	Mysql  Mysql `mapstructure:"mysql" json:"mysql" yaml:"mysql"`
-	Zap     Zap     `mapstructure:"zap" json:"zap" yaml:"zap"`
-}
+import (
+	"errors"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
+)
 
 type Mysql struct {
 	Path        string `mapstructure:"path" json:"path" yaml:"path"`                               // 服务器地址
@@ -26,15 +28,36 @@ func (m *Mysql) GetLogMode() string {
 	return m.LogMode
 }
 
+func InitMysql() error {
+	m := DefaultConfig.Mysql
+	if m.Dbname == "" {
+		return errors.New("mysql config err")
+	}
+	dsn := m.Username + ":" + m.Password + "@tcp(" + m.Path + ")/" + m.Dbname + "?" + m.Config
+	mysqlConfig := mysql.Config{
+		DSN:                      dsn,  // DSN data source name
+		DefaultStringSize:        255,  // string 类型字段的默认长度
+		DisableDatetimePrecision: true, // 禁用 datetime 精度，MySQL 5.6 之前的数据库不支持
+		//DontSupportRenameIndex:    true,  // 重命名索引时采用删除并新建的方式，MySQL 5.7 之前的数据库和 MariaDB 不支持重命名索引
+		//DontSupportRenameColumn:   true,  // 用 `change` 重命名列，MySQL 8 之前的数据库和 MariaDB 不支持重命名列
+		SkipInitializeWithVersion: false, // 根据版本自动配置
+	}
 
-type Zap struct {
-	Level         string `mapstructure:"level" json:"level" yaml:"level"`                            // 级别
-	Format        string `mapstructure:"format" json:"format" yaml:"format"`                         // 输出
-	Prefix        string `mapstructure:"prefix" json:"prefix" yaml:"prefix"`                         // 日志前缀
-	Director      string `mapstructure:"director" json:"director"  yaml:"director"`                  // 日志文件夹
-	ShowLine      bool   `mapstructure:"show-line" json:"show-line" yaml:"show-line"`                // 显示行
-	EncodeLevel   string `mapstructure:"encode-level" json:"encode-level" yaml:"encode-level"`       // 编码级
-	StacktraceKey string `mapstructure:"stacktrace-key" json:"stacktrace-key" yaml:"stacktrace-key"` // 栈名
-	LogInConsole  bool   `mapstructure:"log-in-console" json:"log-in-console" yaml:"log-in-console"` // 输出控制台
+	db, err := gorm.Open(mysql.New(mysqlConfig), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: true, // use singular table name, table for `User` would be `user` with this option enabled
+		},
+	})
+	if err != nil {
+		return err
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		return err
+	}
+	sqlDB.SetMaxIdleConns(m.MaxIdleCons)
+	sqlDB.SetMaxOpenConns(m.MaxOpenCons)
+	DefaultMysql = db
+
+	return nil
 }
-

@@ -10,7 +10,7 @@ jwt:
 zap:
   level: 'info'
   format: 'console'
-  prefix: '[backend]'
+  prefix: '[gift]'
   director: 'log'
   show-line: true
   encode-level: 'LowercaseColorLevelEncoder'
@@ -32,8 +32,6 @@ casbin:
 system:
   env: 'public'  # Change to "develop" to skip authentication for development mode
   addr: 9000
-  db-type: 'mysql'
-  oss-type: 'local'    # 控制oss选择走本地还是 七牛等其他仓 自行增加其他oss仓可以在 server/utils/upload/upload.go 中 NewOss函数配置
   use-redis: false     # 使用redis
   use-multipoint: false
   # IP限制次数 一个小时15000次
@@ -48,35 +46,18 @@ captcha:
   img-height: 80
 
 mysql:
-  path: ''
-  port: ''
-  config: ''
-  db-name: ''
-  username: ''
-  password: ''
+  path: 127.0.0.1
+  port: "3306"
+  config: charset=utf8mb4&parseTime=True&loc=Local
+  db-name: gift0530
+  username: root
+  password: rootroot
   max-idle-conns: 10
   max-open-conns: 100
-  log-mode: ""
-  log-zap: false
+  log-mode: debug
+  log-zap: true
 
 
 # local configuration
 local:
   path: 'uploads/file'
-
-
-# 跨域配置
-# 需要配合 server/initialize/router.go#L32 使用
-cors:
-  mode: whitelist # 放行模式: allow-all, 放行全部; whitelist, 白名单模式, 来自白名单内域名的请求添加 cors 头; strict-whitelist 严格白名单模式, 白名单外的请求一律拒绝
-  whitelist:
-    - allow-origin: example1.com
-      allow-headers: content-type
-      allow-methods: GET, POST
-      expose-headers: Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type
-      allow-credentials: true # 布尔值
-    - allow-origin: example2.com
-      allow-headers: content-type
-      allow-methods: GET, POST
-      expose-headers: Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type
-      allow-credentials: true # 布尔值

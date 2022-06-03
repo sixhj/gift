@@ -1,0 +1,6 @@
+
+
+### GET request with a header
+GET {{host}}/ping
+
+{}

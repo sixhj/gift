@@ -2,6 +2,7 @@ package main
 
 import (
 	"gift/boot"
+	"gift/pkg"
 )
 
 func main() {
@@ -11,4 +12,5 @@ func main() {
 		panic(err)
 	}
 
+	pkg.Start()
 }
