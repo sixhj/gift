@@ -1,6 +1,8 @@
 # gift
 
-使用dart、golang，基于flutter、gin实现的后台管理系统。
+
+gift = gin + flutter
+
 
 
 ## 代码结构
@@ -9,9 +11,17 @@ frontend    前端
 backend     后端
 
 
-## QQ
+## TODO
 
-交流群：758565433
+用户管理
+角色管理
+部门管理
+菜单管理
+
+
+
+
+
 
 
 
